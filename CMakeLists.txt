@@ -29,14 +29,15 @@ else()
 endif()
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
-
-find_package(OpenCV 4.4)
-   if(NOT OpenCV_FOUND)
-      message(FATAL_ERROR "OpenCV > 4.4 not found.")
-   endif()
-
+#set()
+#find_package(OpenCV EXACT REQUIRED PATHS /home/rami/nr22-software/include/ORB_SLAM3_OPENCV4/Thirdparty/opencv-4.4.0)#${PROJECT_SOURCE_DIR}/Thirdparty/opencv-4.4.0)
+find_package (OpenCV 4.4 EXACT REQUIRED PATHS /home/rami/nr22-software/include/ORB_SLAM3_OPENCV4/Thirdparty/opencv-4.4.0/build NO_DEFAULT_PATH)
+    if(NOT OpenCV_FOUND)
+       message(FATAL_ERROR "OpenCV > 4.4 not found.")
+    endif()
 MESSAGE("OPENCV VERSION:")
 MESSAGE(${OpenCV_VERSION})
+
 
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
@@ -120,6 +121,7 @@ ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
 ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
+${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 -lboost_serialization
 -lcrypto
