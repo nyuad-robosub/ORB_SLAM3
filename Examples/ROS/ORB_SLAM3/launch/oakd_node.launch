@@ -1,0 +1,8 @@
+<launch>
+    <node pkg="ORB_SLAM3" type="OAKD/ros_stereo_oakd.cc">
+        <param name="vocab" type="str" value=""/>
+        <param name="config" type="str" value=""/>
+        <param name="left_img_name" type="str" value=""/>
+        <param name="right_img_name" type="str" value=""/>
+    </node>
+</launch>
