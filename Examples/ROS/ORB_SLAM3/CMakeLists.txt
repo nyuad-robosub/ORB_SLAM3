@@ -46,6 +46,9 @@ find_package(depthai CONFIG REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 
+#################### Catkin ###########################
+find_package(catkin QUIET)
+
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/../../../
@@ -125,6 +128,6 @@ target_link_libraries(Stereo_oakd
 ${LIBS}
 )
 
-install(DIRECTORY ros/launch/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/launch
-)
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+  PATTERN ".svn" EXCLUDE)
