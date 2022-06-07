@@ -1,8 +1,10 @@
 <launch>
-    <node pkg="ORB_SLAM3" type="OAKD/ros_stereo_oakd.cc">
-        <param name="vocab" type="str" value=""/>
-        <param name="config" type="str" value=""/>
-        <param name="left_img_name" type="str" value=""/>
-        <param name="right_img_name" type="str" value=""/>
+    <include file="$(find depthai_examples)/launch/stereo_nodelet.launch"></include>
+    <node pkg="ORB_SLAM3" name="Stereo_oakd" type="Stereo_oakd">
+        <param name="vocab" type="str" value="/home/rami/nr22-software/include/ORB_SLAM3_OPENCV4/Vocabulary/ORBvoc.txt"/>
+        <param name="config" type="str" value="/home/rami/nr22-software/include/ORB_SLAM3_OPENCV4/Examples/ROS/ORB_SLAM3/Asus1.yaml"/>
+        <param name="left_img_name" type="str" value="/stereo_publisher/left/image"/><!-- ROS IMAGE NODE NAMES-->
+        <param name="right_img_name" type="str" value="/stereo_publisher/right/image"/>
+        <!--<param name="imu_topic" type="str" value=""/>-->
     </node>
 </launch>
