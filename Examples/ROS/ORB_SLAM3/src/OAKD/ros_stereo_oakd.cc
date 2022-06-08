@@ -49,18 +49,20 @@ typedef struct _Pose
     Eigen::Vector3f position;
     Eigen::Quaternionf rotation;
 } Pose;
-class Params {
+class Params
+{
 protected:
     ros::NodeHandle nh_;
     std::string vocab, config, left_img_name, right_img_name;
-    void ReadParams() {
+    void ReadParams()
+    {
         int badParams = 0;
         badParams += !nh_.getParam("/Stereo_oakd/vocab", vocab);
         badParams += !nh_.getParam("/Stereo_oakd/config", config);
         cout << badParams;
         badParams += !nh_.getParam("/Stereo_oakd/left_img_name", left_img_name);
         cout << badParams;
-        badParams += !nh_.getParam("/Stereo_oakd/right_img_name", right_img_name);//what about framerates?
+        badParams += !nh_.getParam("/Stereo_oakd/right_img_name", right_img_name); // what about framerates?
         cout << badParams;
 
         if (badParams > 0)
@@ -72,8 +74,10 @@ protected:
         left_img_name="/stereo_publisher/left/image";
         right_img_name="/stereo_publisher/right/image";*/
     }
-public: 
-    Params() {
+
+public:
+    Params()
+    {
         ReadParams();
     }
 };
@@ -93,11 +97,47 @@ private:
 
     cv_bridge::CvImageConstPtr left_img_ptr, right_img_ptr;
     double frame_timestamp_s;
+
     Pose pose;
+    Sophus::SE3f pose_sophus;
+
+    ros::Publisher lost_pub;
+    geometry_msgs::TransformStamped transformStamped;
+
+    void PublishTF()
+    {
+        pose.position = pose_sophus.translation();
+        pose.rotation = pose_sophus.unit_quaternion();
+
+        transformStamped.header.frame_id = "world";
+        transformStamped.child_frame_id = "orb_slam3_camera";
+        transformStamped.transform.translation.x = pose.position[0];
+        transformStamped.transform.translation.y = pose.position[1];
+        transformStamped.transform.translation.z = pose.position[2];
+        tf2::Quaternion q;
+        q.setRPY(0, 0, 0);
+        transformStamped.transform.rotation.x = pose.rotation.x();
+        transformStamped.transform.rotation.y = pose.rotation.y();
+        transformStamped.transform.rotation.z = pose.rotation.z();
+        transformStamped.transform.rotation.w = pose.rotation.w();
+
+        transformStamped.header.stamp = ros::Time::now();
+        tfb.sendTransform(transformStamped);
+    }
+
+    void PublishLost()
+    {
+        bool islost = pose_sophus.isLost();
+        std_msgs::Bool t;
+        t.data=islost;
+
+        lost_pub.publish(t);
+    }
 
 public:
     Handler() : Params(), it_(nh_), left_img(it_, left_img_name, 1), right_img(it_, right_img_name, 1), sync(MySyncPolicy(10), left_img, right_img), SLAM(vocab, config, ORB_SLAM3::System::STEREO, true)
-    {  
+    {
+        lost_pub= nh_.advertise<std_msgs::Bool>("ORB_SLAM_3_LOST", 500);
         sync.registerCallback(boost::bind(&Handler::callback, this, _1, _2));
     }
     void callback(
@@ -107,49 +147,30 @@ public:
 
         try
         {
-            left_img_ptr = cv_bridge::toCvShare(left_img); // use same encoding of left_img also how to store cv mat
+            left_img_ptr = cv_bridge::toCvShare(left_img);
             right_img_ptr = cv_bridge::toCvShare(right_im);
             std_msgs::Header h = left_img_ptr->header;
             frame_timestamp_s = h.stamp.sec;
 
-            Sophus::SE3f pose_sophus = SLAM.TrackStereo(
-                left_img_ptr->image, // CV:MAT USE CV BRIDGE TO GET IT 8UC1 CV MAT
+            pose_sophus = SLAM.TrackStereo(
+                left_img_ptr->image,
                 right_img_ptr->image,
                 frame_timestamp_s);
-            pose.position = pose_sophus.translation();
-            pose.rotation = pose_sophus.unit_quaternion();
-            PublishTF(pose);
+
+            // publish TF and whether orb slam is lost or not
+            PublishTF();
+            PublishLost();
         }
         catch (cv_bridge::Exception &e)
         {
             ROS_ERROR("cv_bridge exception: %s", e.what());
             return;
         }
-        catch(...) {
+        catch (...)
+        {
             ROS_ERROR("An unknown exception occured.");
             return;
         }
-    }
-
-    void PublishTF(Pose &ps)
-    {
-
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped.header.frame_id = "world";
-        transformStamped.child_frame_id = "orb_slam3_camera";
-        transformStamped.transform.translation.x = ps.position[0];
-        transformStamped.transform.translation.y = ps.position[1];
-        transformStamped.transform.translation.z = ps.position[2];
-        tf2::Quaternion q;
-        q.setRPY(0, 0, 0);
-        transformStamped.transform.rotation.x = ps.rotation.x();
-        transformStamped.transform.rotation.y = ps.rotation.y();
-        transformStamped.transform.rotation.z = ps.rotation.z();
-        transformStamped.transform.rotation.w = ps.rotation.w();
-
-        transformStamped.header.stamp = ros::Time::now();
-        tfb.sendTransform(transformStamped);
     }
 
     ~Handler()
