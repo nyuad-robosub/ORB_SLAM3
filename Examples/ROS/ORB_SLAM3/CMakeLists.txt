@@ -45,6 +45,7 @@ find_package(depthai CONFIG REQUIRED)
 #find_package(camera_info_manager REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
+find_package(std_msgs REQUIRED)
 
 #################### Catkin ###########################
 find_package(catkin QUIET)
@@ -57,11 +58,15 @@ ${PROJECT_SOURCE_DIR}/../../../include/CameraModels
 ${PROJECT_SOURCE_DIR}/../../../Thirdparty/Sophus
 ${Pangolin_INCLUDE_DIRS}
 ${image_transport_INCLUDE_DIRS}
+${std_msgs_INCLUDE_DIRS}
+${catkin_INCLUDE_DIRS}
 )
 
 set(LIBS 
 depthai::core
+${catkin_LIBRARIES}
 ${image_transport_LIBS}
+${std_msgs_LIBS}
 ${cv_bridge_LIBS}
 ${OpenCV_LIBS} 
 ${EIGEN3_LIBS}

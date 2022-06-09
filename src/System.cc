@@ -1347,15 +1347,15 @@ double System::GetTimeFromIMUInit()
 
 bool System::isLost()
 {
-    if (!mpAtlas->isImuInitialized())
+    /*if (!mpAtlas->isImuInitialized())
         return false;
     else
-    {
-        if ((mpTracker->mState==Tracking::LOST)) //||(mpTracker->mState==Tracking::RECENTLY_LOST))
+    {*/
+        if ((mpTracker->mState==Tracking::LOST)||(mpTracker->mState==Tracking::RECENTLY_LOST)) //||(mpTracker->mState==Tracking::RECENTLY_LOST))
             return true;
         else
             return false;
-    }
+    //}
 }
 
 

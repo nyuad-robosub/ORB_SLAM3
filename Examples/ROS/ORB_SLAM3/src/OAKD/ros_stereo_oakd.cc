@@ -23,6 +23,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/mat.hpp>
 #include <sensor_msgs/PointCloud2.h>
+#include "std_msgs/Bool.h"
 #include "System.h"
 #include "Converter.h"
 #include <geometry_msgs/PoseStamped.h>
@@ -127,7 +128,7 @@ private:
 
     void PublishLost()
     {
-        bool islost = pose_sophus.isLost();
+        bool islost = SLAM.isLost();
         std_msgs::Bool t;
         t.data=islost;
 
