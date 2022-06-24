@@ -112,14 +112,14 @@ private:
 
         transformStamped.header.frame_id = "world";
         transformStamped.child_frame_id = "orb_slam3_camera";
-        transformStamped.transform.translation.x = pose.position[0];
-        transformStamped.transform.translation.y = pose.position[1];
-        transformStamped.transform.translation.z = pose.position[2];
+        transformStamped.transform.translation.x = -pose.position[0];
+        transformStamped.transform.translation.y = -pose.position[1];
+        transformStamped.transform.translation.z = -pose.position[2];
         tf2::Quaternion q;
         q.setRPY(0, 0, 0);
-        transformStamped.transform.rotation.x = pose.rotation.x();
-        transformStamped.transform.rotation.y = pose.rotation.y();
-        transformStamped.transform.rotation.z = pose.rotation.z();
+        transformStamped.transform.rotation.x = -pose.rotation.x();
+        transformStamped.transform.rotation.y = -pose.rotation.y();
+        transformStamped.transform.rotation.z = -pose.rotation.z();
         transformStamped.transform.rotation.w = pose.rotation.w();
 
         transformStamped.header.stamp = ros::Time::now();
