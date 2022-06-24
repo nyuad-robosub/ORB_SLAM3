@@ -28,8 +28,8 @@ set(SRCS_DUTILS
   DUtils/Random.cpp
   DUtils/Timestamp.cpp)
 
-
-find_package(OpenCV 4 QUIET)
+find_package (OpenCV 4.4 EXACT REQUIRED PATHS ~/nr22-software/include/ORB_SLAM3_OPENCV4/Thirdparty/opencv-4.4.0/build NO_DEFAULT_PATH)
+#find_package(OpenCV 4 QUIET)
 if(NOT OpenCV_FOUND)
    find_package(OpenCV 3.0 QUIET)
    if(NOT OpenCV_FOUND)
