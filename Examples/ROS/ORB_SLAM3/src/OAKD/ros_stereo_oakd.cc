@@ -107,20 +107,28 @@ private:
 
     void PublishTF()
     {
-        pose.position = pose_sophus.translation();
-        pose.rotation = pose_sophus.unit_quaternion();
+        pose_sophus=pose_sophus.inverse();//Twc to Tcw
+        pose.rotation = Eigen::Quaternionf(pose_sophus.rotationMatrix()); 
+
+
+        transformStamped.transform.rotation.y = pose.rotation.y(); // this is not rotating about its own axis but world causing large circles
+        transformStamped.transform.rotation.x = pose.rotation.x();
+        transformStamped.transform.rotation.z = pose.rotation.z();
+        transformStamped.transform.rotation.w = pose.rotation.w();
+
+        // pose.rotation = Eigen::Quaternionf(pose_sophus.rotationMatrix());
+
+        pose.position = pose_sophus.translation();//vector3f eigen
+        //pose.position = pose_sophus.rotationMatrix().inverse() * pose.position;
 
         transformStamped.header.frame_id = "world";
         transformStamped.child_frame_id = "orb_slam3_camera";
-        transformStamped.transform.translation.x = -pose.position[0];
-        transformStamped.transform.translation.y = -pose.position[1];
-        transformStamped.transform.translation.z = -pose.position[2];
-        tf2::Quaternion q;
-        q.setRPY(0, 0, 0);
-        transformStamped.transform.rotation.x = -pose.rotation.x();
-        transformStamped.transform.rotation.y = -pose.rotation.y();
-        transformStamped.transform.rotation.z = -pose.rotation.z();
-        transformStamped.transform.rotation.w = pose.rotation.w();
+        transformStamped.transform.translation.x = pose.position.x();
+        transformStamped.transform.translation.y = pose.position.y();
+        transformStamped.transform.translation.z = pose.position.z();
+        //pose.rotation = pose_sophus.unit_quaternion();
+        // pose.rotation = Eigen::Quaternionf();
+     
 
         transformStamped.header.stamp = ros::Time::now();
         tfb.sendTransform(transformStamped);
@@ -130,15 +138,15 @@ private:
     {
         bool islost = SLAM.isLost();
         std_msgs::Bool t;
-        t.data=islost;
+        t.data = islost;
 
         lost_pub.publish(t);
     }
 
 public:
-    Handler() : Params(), it_(nh_), left_img(it_, left_img_name, 1), right_img(it_, right_img_name, 1), sync(MySyncPolicy(10), left_img, right_img), SLAM(vocab, config, ORB_SLAM3::System::STEREO, true)
+    Handler() : Params(), it_(nh_), left_img(it_, left_img_name, 1), right_img(it_, right_img_name, 1), sync(MySyncPolicy(30), left_img, right_img), SLAM(vocab, config, ORB_SLAM3::System::STEREO, true)
     {
-        lost_pub= nh_.advertise<std_msgs::Bool>("ORB_SLAM_3_LOST", 500);
+        lost_pub = nh_.advertise<std_msgs::Bool>("ORB_SLAM_3_LOST", 500);
         sync.registerCallback(boost::bind(&Handler::callback, this, _1, _2));
     }
     void callback(
