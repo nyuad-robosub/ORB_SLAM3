@@ -146,7 +146,7 @@ private:
 public:
     Handler() : Params(), it_(nh_), left_img(it_, left_img_name, 1), right_img(it_, right_img_name, 1), sync(MySyncPolicy(30), left_img, right_img), SLAM(vocab, config, ORB_SLAM3::System::STEREO, true)
     {
-        lost_pub = nh_.advertise<std_msgs::Bool>("ORB_SLAM_3_LOST", 500);
+        lost_pub = nh_.advertise<std_msgs::Bool>("orb_slam3_lost", 500);
         sync.registerCallback(boost::bind(&Handler::callback, this, _1, _2));
     }
     void callback(
