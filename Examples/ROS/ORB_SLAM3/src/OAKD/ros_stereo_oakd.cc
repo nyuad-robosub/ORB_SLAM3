@@ -55,6 +55,7 @@ class Params
 protected:
     ros::NodeHandle nh_;
     std::string vocab, config, left_img_name, right_img_name;
+    bool gui;
     void ReadParams()
     {
         int badParams = 0;
@@ -65,15 +66,13 @@ protected:
         cout << badParams;
         badParams += !nh_.getParam("/Stereo_oakd/right_img_name", right_img_name); // what about framerates?
         cout << badParams;
+        badParams += !nh_.getParam("/Stereo_oakd/gui", gui);
+        cout << badParams;
 
         if (badParams > 0)
         {
             ROS_ERROR("Couldn't find at least one of the parameters");
         }
-        /*vocab="/home/rami/nr22-software/include/ORB_SLAM3_OPENCV4/Vocabulary/ORBvoc.txt";
-        config="/home/rami/nr22-software/include/ORB_SLAM3_OPENCV4/Examples/ROS/ORB_SLAM3/Asus1.yaml";
-        left_img_name="/stereo_publisher/left/image";
-        right_img_name="/stereo_publisher/right/image";*/
     }
 
 public:
@@ -144,7 +143,7 @@ private:
     }
 
 public:
-    Handler() : Params(), it_(nh_), left_img(it_, left_img_name, 1), right_img(it_, right_img_name, 1), sync(MySyncPolicy(30), left_img, right_img), SLAM(vocab, config, ORB_SLAM3::System::STEREO, true)
+    Handler() : Params(), it_(nh_), left_img(it_, left_img_name, 1), right_img(it_, right_img_name, 1), sync(MySyncPolicy(30), left_img, right_img), SLAM(vocab, config, ORB_SLAM3::System::STEREO, gui)
     {
         lost_pub = nh_.advertise<std_msgs::Bool>("orb_slam3_lost", 500);
         sync.registerCallback(boost::bind(&Handler::callback, this, _1, _2));
